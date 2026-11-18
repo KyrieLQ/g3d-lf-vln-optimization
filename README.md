@@ -10,19 +10,19 @@
 
 停止时距目标 **0.26 米**（优化版） / **22.66 米**（原版）。
 
-https://github.com/user-attachments/assets/400d30ad-77e3-4234-96ff-9787c36d18d4
+https://github.com/user-attachments/assets/49c109cc-2ffc-4d55-ba2e-64692133201c
 
 ### 任务 1643 · 经过楼梯进入起居室，右转后在边桌旁停下
 
 停止时距目标 **1.15 米**（优化版） / **8.87 米**（原版）。
 
-https://github.com/user-attachments/assets/43ba5263-c68e-4f5a-8b1b-4e84967be1f3
+https://github.com/user-attachments/assets/1cb899df-1c77-4297-8125-6ee11db77d55
 
 ### 任务 416 · 在视力表处左转，再右转进入厨房，在水槽旁停下
 
 停止时距目标 **0.35 米**（优化版） / **8.46 米**（原版）。
 
-https://github.com/user-attachments/assets/be326ab2-1547-4b7a-b9f5-9757763b8a36
+https://github.com/user-attachments/assets/4b04bf23-5d4e-43de-94e2-c4cc97c96c92
 
 ## 项目简介
 
