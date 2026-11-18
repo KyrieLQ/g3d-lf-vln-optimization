@@ -1,40 +1,40 @@
-# World-Model-Assisted Vision-and-Language Navigation
+# 世界模型辅助的视觉语言导航决策优化（VLN）
 
-This project extends the panoramic [g3D-LF](https://github.com/MrZihan/g3D-LF) navigation policy so it can learn from complete routes and adapt how much it trusts predicted views when choosing its next action.
+本项目基于全景版 [g3D-LF](https://github.com/MrZihan/g3D-LF)，让智能体根据语言指令在室内选路，并在目标附近停下。项目用整段导航的结果优化局部决策，并根据当前观测自适应地调整世界模型预测对决策的影响。
 
-## Approach
+## 方法
 
-- **GRPO post-training.** Sample multiple rollouts from the same start and instruction. Use success, path efficiency, and distance to the goal to compute group-relative advantages. A clipped objective and a KL penalty constrain policy updates.
-- **Reliability fusion.** A 449-parameter MLP uses 12 statistics from candidate scores and predicted visual features to adjust how much the lookahead branch influences waypoint and stop decisions. The gate is initialized with candidate-ranking supervision and tuned on logged returns. The 3D feature field stays frozen.
+- **GRPO 后训练。** 对同一条指令和同一起点采样多条轨迹，用任务是否成功、路径效率和终点到目标的距离计算回报，再用组内相对优势更新策略。裁剪目标和 KL 惩罚约束更新幅度。
+- **可靠性融合。** 用一个仅 449 个参数的 MLP，从候选评分和预测视觉特征中提取 12 项统计量，动态调节全局评分和前瞻评分的融合权重，影响路点选择和停止决策。先用候选排序一致性训练融合模块，再用已记录的轨迹回报做离线微调。三维特征场保持冻结。
 
-## Results
+## 评估结果
 
-R2R-CE `val_unseen`, panoramic Habitat simulation. Both saved evaluations cover the same 1,839 episodes across 11 scenes. SR is success rate. SPL weights successful episodes by path efficiency.
+在 Habitat 仿真中评估 R2R-CE `val_unseen`，两组历史评估覆盖相同的 11 个场景、1,839 条导航任务。SR 为成功率，SPL 为按路径效率加权的成功率。
 
-| Model | SR ↑ | SPL ↑ |
+| 模型 | SR ↑ | SPL ↑ |
 | --- | ---: | ---: |
-| Original g3D-LF, released checkpoint | 60.20% | 50.85% |
-| GRPO + reliability fusion | **61.45%** | **51.95%** |
-| Difference | **+1.25 pp** | **+1.10 pp** |
+| 原版 g3D-LF（官方检查点） | 60.20% | 50.85% |
+| GRPO + 可靠性融合 | **61.45%** | **51.95%** |
+| 变化 | **+1.25 个百分点** | **+1.10 个百分点** |
 
-These are point estimates from two historical evaluation runs of the complete policies.
+<a name="demo-videos"></a>
 
-## Demo videos
+## 演示视频
 
-Three matched episodes where the original policy failed and the optimized policy succeeded. Each clip animates the optimized model's recorded trajectory and shows the original model's final distance from its evaluation log.
+以下三条任务中，原版模型失败，优化版成功。点击预览可打开 MP4。视频回放优化版的实际轨迹，并显示评估日志中记录的原版最终距离。
 
-| Episode and goal | Original final distance | Optimized final distance | Video |
+| 任务 | 原版最终距离 | 优化版最终距离 | 视频 |
 | --- | ---: | ---: | --- |
-| **207** · Follow the corridor to the next doors | 20.68 m · fail | **0.26 m · success** | [![Episode 207 preview](demos/episode-207.png)](demos/episode-207.mp4) |
-| **1643** · Stop by the end table in the great room | 8.87 m · fail | **1.15 m · success** | [![Episode 1643 preview](demos/episode-1643.png)](demos/episode-1643.mp4) |
+| **207** · 沿走廊走到下一组门前 | 20.68 米 · 失败 | **0.26 米 · 成功** | [![任务 207 预览](demos/episode-207.png)](demos/episode-207.mp4) |
+| **1643** · 在起居室的边桌旁停下 | 8.87 米 · 失败 | **1.15 米 · 成功** | [![任务 1643 预览](demos/episode-1643.png)](demos/episode-1643.mp4) |
 
-## Code
+## 代码
 
-The repository contains the PyTorch method components. Environment setup, simulator rollouts, and checkpoints are external dependencies. See [integration notes](docs/integration.md) for the tensor interface and evaluation setup.
+仓库收录了 PyTorch 核心实现。完整运行需要上游仿真环境、数据和模型权重，接口和评估设置见[集成说明](docs/integration.md)。
 
-- [GRPO objectives](vln_policy/grpo.py)
-- [Candidate features, reliability gate, and offline tuning objective](vln_policy/reliability.py)
+- [GRPO 训练目标](vln_policy/grpo.py)
+- [候选特征、可靠性融合与离线微调目标](vln_policy/reliability.py)
 
-## Acknowledgments
+## 参考与致谢
 
-The navigation backbone is from [g3D-LF (CVPR 2025)](https://openaccess.thecvf.com/content/CVPR2025/papers/Wang_g3D-LF_Generalizable_3D-Language_Feature_Fields_for_Embodied_Tasks_CVPR_2025_paper.pdf). The online post-training recipe is adapted from [ETP-R1](https://arxiv.org/abs/2512.20940). The research replays use navigation results from Matterport3D scenes. See the [Matterport3D data terms](https://kaldir.vc.in.tum.de/matterport/MP_TOS.pdf).
+导航基座来自 [g3D-LF（CVPR 2025）](https://openaccess.thecvf.com/content/CVPR2025/papers/Wang_g3D-LF_Generalizable_3D-Language_Feature_Fields_for_Embodied_Tasks_CVPR_2025_paper.pdf)。在线后训练参考 [ETP-R1](https://arxiv.org/abs/2512.20940)。演示使用基于 Matterport3D 场景取得的导航结果，相关条款见 [Matterport3D 数据使用协议](https://kaldir.vc.in.tum.de/matterport/MP_TOS.pdf)。
